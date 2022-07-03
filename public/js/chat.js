@@ -1,50 +1,61 @@
 var socket = io();
 
+// const $messagesUILI = document.getElementById('messages');
+const $messages = document.querySelector('#messages');
+const $sendLocationButton = document.getElementById('send-location');
+
+const $messageForm = document.querySelector('#message-form');
+const $messageFormInput = $messageForm.querySelector('input');
+const $messageFormButton = $messageForm.querySelector('button')
+
+// Templates
+const messageTemplate = document.querySelector('#message-template').innerHTML
+
 socket.on('message', (message) => {
 	console.log(message)
+	
+	// templates uses
+	const html = Mustache.render(messageTemplate, {
+		messages: message
+	})
+    $messages.insertAdjacentHTML('beforeend', html);
 })
 
-// var form = document.getElementById('message-form');
-// var input = document.getElementById('input');
-
-// form.addEventListener('submit', function(e) {
-//     e.preventDefault();
-//     if (input.value) {
-// 		socket.emit('chat message', input.value);
-// 		input.value = '';
-//     }
-// });
-
-document.querySelector('#message-form').addEventListener('submit', (e) => {
+$messageForm.addEventListener('submit', (e) => {
 	e.preventDefault();
+	// disable
+	$messageFormButton.setAttribute('disabled', 'disabled')
 	const message = e.target.elements.message.value
 
 	socket.emit('sendMessage', message, (error) => {
+		// enable
+		$messageFormButton.removeAttribute('disabled')
+		$messageFormInput.value = ''
+		$messageFormInput.focus()
+
 		if (error) {
 			return console.log(error)
 		}
 		console.log('Message delivered!')
 	})
-	e.target.elements.message.value = ''
 })
 
-var messages = document.getElementById('messages');
+// socket.on('sendMessage', function(msg) {
+//     var item = document.createElement('li');
+//     item.textContent = msg;
+//     messages.appendChild(item);
+//     window.scrollTo(0, document.body.scrollHeight);
+// });
 
-socket.on('sendMessage', function(msg) {
-    var item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-});
-
-var sendLocation = document.getElementById('send-location');
-
-sendLocation.addEventListener('click', (e) => {
+$sendLocationButton.addEventListener('click', (e) => {
 	if (!navigator.geolocation) {
 		return alert('Geolocation not supported by your browser');
 	}
+	$sendLocationButton.setAttribute('disabled', 'disabled')
 
 	navigator.geolocation.getCurrentPosition((position) => {
+
+		$sendLocationButton.removeAttribute('disabled')
 		socket.emit('sendLocation', {
 			"latitude": position.coords.latitude,
 			"longitude": position.coords.longitude

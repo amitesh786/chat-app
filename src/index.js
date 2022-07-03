@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
 		}
 
 		io.emit('message', msg);
-		io.emit('sendMessage', msg);
+		// io.emit('sendMessage', msg);
 
 		callback()
 	});
