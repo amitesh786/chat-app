@@ -4,6 +4,8 @@ const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
 
+const { generateMessage } = require('./utils/messages')
+
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
@@ -14,9 +16,9 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 app.use(express.static(publicDirectoryPath))
 
 io.on('connection', (socket) => {
-	socket.emit('message', 'Welcome!');
+	socket.emit('message', generateMessage('Welcome...!') );
 
-	socket.broadcast.emit('message', 'A new user join');
+	socket.broadcast.emit('message', generateMessage('A new user join'));
 
 	socket.on('sendMessage', (msg, callback) => {
 		const filter = new Filter()
@@ -25,9 +27,8 @@ io.on('connection', (socket) => {
 			return callback('Profanty is not allowed')
 		}
 
-		io.emit('message', msg);
+		io.emit('message', generateMessage(msg));
 		// io.emit('sendMessage', msg);
-
 		callback()
 	});
 
@@ -38,7 +39,7 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnect', () => {
 		console.log('user disconnected');
-		io.emit('message', 'User has left');
+		io.emit('message', generateMessage('User has left'));
 	});
 })
 
