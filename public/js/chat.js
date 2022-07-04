@@ -1,6 +1,5 @@
 var socket = io();
 
-// const $messagesUILI = document.getElementById('messages');
 const $messages = document.querySelector('#messages');
 const $sendLocationButton = document.getElementById('send-location');
 
