@@ -10,12 +10,19 @@ const $messageFormButton = $messageForm.querySelector('button')
 // Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMsgTemplate = document.querySelector('#location-msg-template').innerHTML;
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
+
+// Options
+const { username, room } = Qs.parse(location.search, {
+	ignoreQueryPrefix: true
+});
 
 socket.on('message', (message) => {
 	console.log(message);
 	
 	// templates uses
 	const html = Mustache.render(messageTemplate, {
+		username: message.username,
 		messages: message.text,
 		createdAt: moment(message.createdAt).format('h:mm a')
 	})
@@ -26,6 +33,7 @@ socket.on('locationMessage', (msg) => {
 	console.log(msg);
 
 	const html = Mustache.render(locationMsgTemplate, {
+		username: msg.username,
 		url: msg.url,
 		createdAt: moment(msg.createdAt).format('h:mm a')
 	})
@@ -75,5 +83,23 @@ $sendLocationButton.addEventListener('click', (e) => {
 		});
 	
 	})
+})
 
+socket.emit('join', {
+	username, room
+}, (error) => {
+
+	if (error) {
+		alert(error)
+		location.href = '/'
+	}
+})
+
+socket.on('roomData', ({ room, users }) => {
+	const html = Mustache.render(sidebarTemplate, {
+		room,
+		users
+	})
+
+	document.querySelector('#sidebar').innerHTML = html
 })
