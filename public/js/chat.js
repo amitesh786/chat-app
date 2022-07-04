@@ -9,16 +9,27 @@ const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button')
 
 // Templates
-const messageTemplate = document.querySelector('#message-template').innerHTML
+const messageTemplate = document.querySelector('#message-template').innerHTML;
+const locationMsgTemplate = document.querySelector('#location-msg-template').innerHTML;
 
 socket.on('message', (message) => {
-	console.log(message)
+	console.log(message);
 	
 	// templates uses
 	const html = Mustache.render(messageTemplate, {
 		messages: message
 	})
     $messages.insertAdjacentHTML('beforeend', html);
+})
+
+socket.on('locationMessage', (url) => {
+	console.log(url);
+
+	const html = Mustache.render(locationMsgTemplate, {
+		url
+	})
+
+	$messages.insertAdjacentHTML('beforeend', html);
 })
 
 $messageForm.addEventListener('submit', (e) => {
