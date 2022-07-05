@@ -17,6 +17,29 @@ const { username, room } = Qs.parse(location.search, {
 	ignoreQueryPrefix: true
 });
 
+const autoscroll = () => {
+	// new message content
+	const $newMsg = $messages.lastElementChild
+
+	// height of new message
+	const newMsgStyles = getComputedStyle($newMsg)
+	const newMsgMargin = parseInt(newMsgStyles.marginBottom)
+	const newMsgHeight = $newMsg.offsetHeight + newMsgMargin
+
+	// visible height
+	const visibleHeight = $messages.offsetHeight
+
+	// height of messages container
+	const containerHeight = $messages.scrollHeight
+
+	// how far have i scroll
+	const scrollOffset = $messages.scrollTop + visibleHeight
+
+	if (containerHeight - newMsgHeight <= scrollOffset) {
+		$messages.scrollTop = $messages.scrollHeight
+	}
+}
+
 socket.on('message', (message) => {
 	console.log(message);
 	
@@ -27,6 +50,7 @@ socket.on('message', (message) => {
 		createdAt: moment(message.createdAt).format('h:mm a')
 	})
     $messages.insertAdjacentHTML('beforeend', html);
+	autoscroll()
 })
 
 socket.on('locationMessage', (msg) => {
@@ -38,6 +62,7 @@ socket.on('locationMessage', (msg) => {
 		createdAt: moment(msg.createdAt).format('h:mm a')
 	})
 	$messages.insertAdjacentHTML('beforeend', html);
+	autoscroll()
 })
 
 $messageForm.addEventListener('submit', (e) => {
@@ -56,15 +81,8 @@ $messageForm.addEventListener('submit', (e) => {
 			return console.log(error)
 		}
 		console.log('Message delivered!')
-	})
-})
-
-// socket.on('sendMessage', function(msg) {
-//     var item = document.createElement('li');
-//     item.textContent = msg;
-//     messages.appendChild(item);
-//     window.scrollTo(0, document.body.scrollHeight);
-// });
+	});
+});
 
 $sendLocationButton.addEventListener('click', (e) => {
 	if (!navigator.geolocation) {
@@ -81,9 +99,8 @@ $sendLocationButton.addEventListener('click', (e) => {
 		}, () => {
 			console.log('Location shared!')
 		});
-	
-	})
-})
+	});
+});
 
 socket.emit('join', {
 	username, room
